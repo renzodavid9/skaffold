@@ -63,6 +63,8 @@ func main() {
 		skaffoldVersion = os.Args[1]
 	}
 
+	skaffoldVersion = strings.TrimPrefix(skaffoldVersion, "v")
+
 	// Add extra string if new schema version is being released
 	schemaPath := path.Join("pkg", "skaffold", "schema", "latest", "config.go")
 	released, err := schema.IsReleased(schemaPath)
@@ -95,8 +97,8 @@ func writeVersionMapping(binVersion string, output string) error {
 	defer file.Close()
 
 	b, err := json.Marshal(versionNote{
-		BinVersion:      binVersion,
-		ReleaseNoteLink: "https://github.com/GoogleContainerTools/skaffold/releases/tag/" + binVersion,
+		BinVersion:      "v" + binVersion,
+		ReleaseNoteLink: "https://github.com/GoogleContainerTools/skaffold/releases/tag/v" + binVersion,
 	})
 	if err != nil {
 		return err
@@ -109,9 +111,8 @@ func writeVersionMapping(binVersion string, output string) error {
 }
 
 func getChangelogData(skaffoldVersion string, released bool) changelogData {
-	data := changelogData{}
+	data := changelogData{SkaffoldVersion: skaffoldVersion}
 
-	data.SkaffoldVersion = strings.TrimPrefix(skaffoldVersion, "v")
 	semver.MustParse(data.SkaffoldVersion)
 
 	// Get current time
